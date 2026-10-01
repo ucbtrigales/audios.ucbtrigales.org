@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
-      MICROFEED_WORKER_NAME: ${{ secrets.MICROFEED_WORKER_NAME }}
+      MICROFEED_WORKER_NAME: audios-worker
       MICROFEED_CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       WRANGLER_SEND_METRICS: "false"
 
@@ -71,10 +71,6 @@ jobs:
       - name: Validate the target
         shell: bash
         run: |
-          if [[ -z "$MICROFEED_WORKER_NAME" ]]; then
-            echo "::error::Create the MICROFEED_WORKER_NAME Actions secret before deploying."
-            exit 1
-          fi
           if [[ -z "$MICROFEED_CLOUDFLARE_ACCOUNT_ID" ]]; then
             echo "::error::Create the CLOUDFLARE_ACCOUNT_ID Actions secret before deploying. It pins this workflow to one Cloudflare account."
             exit 1
@@ -109,13 +105,12 @@ jobs:
             echo "::error::Create the MICROFEED_ADMINISTRATOR_EMAIL Actions secret before creating a new instance."
             exit 1
           fi
-          resource_prefix="${MICROFEED_WORKER_NAME,,}"
           args=(
             --device
             --account-id "$MICROFEED_CLOUDFLARE_ACCOUNT_ID"
             --project-name "$MICROFEED_WORKER_NAME"
-            --d1-name "${resource_prefix}-db"
-            --r2-name "${resource_prefix}-media"
+            --d1-name audios-db
+            --r2-name audios-r2
             --admin-path admin
             --owner-email "$MICROFEED_ADMINISTRATOR_EMAIL"
             --yes
